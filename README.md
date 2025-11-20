@@ -67,7 +67,7 @@ import { MapComponent } from '@maplibre/ngx-maplibre-gl';
   template: `
     <mgl-map
       [style]="'https://demotiles.maplibre.org/style.json'"
-      [zoom]="[9]"
+      [zoom]="9"
       [center]="[-74.5, 40]"
     >
     </mgl-map>

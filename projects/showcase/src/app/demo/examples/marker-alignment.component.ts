@@ -12,9 +12,9 @@ import { interval, scan, startWith } from 'rxjs';
       [style]="
         'https://api.maptiler.com/maps/streets/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL'
       "
-      [pitch]="[pitch()]"
-      [bearing]="[bearing()]"
-      [zoom]="[17]"
+      [pitch]="pitch()"
+      [bearing]="bearing()"
+      [zoom]="17"
       [center]="[4.577979, 51.038189]"
       [canvasContextAttributes]="{preserveDrawingBuffer: true}"
     >

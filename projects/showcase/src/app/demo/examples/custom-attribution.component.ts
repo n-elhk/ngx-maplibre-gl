@@ -13,7 +13,7 @@ import {
         'https://api.maptiler.com/maps/streets/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL'
       "
       [center]="[-77.04, 38.907]"
-      [zoom]="[11.15]"
+      [zoom]="11.15"
       [attributionControl]="false"
       [canvasContextAttributes]="{preserveDrawingBuffer: true}"
     >

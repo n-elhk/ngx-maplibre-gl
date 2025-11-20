@@ -14,7 +14,7 @@ import type { LayerSpecification } from 'maplibre-gl';
       [style]="
         'https://api.maptiler.com/maps/streets/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL'
       "
-      [zoom]="[3]"
+      [zoom]="3"
       [center]="[-71.97722138410576, -13.517379300798098]"
       [canvasContextAttributes]="{preserveDrawingBuffer: true}"
     >

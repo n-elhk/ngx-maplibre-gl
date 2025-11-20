@@ -14,7 +14,7 @@ import {
       [style]="
         'https://api.maptiler.com/maps/streets/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL'
       "
-      [zoom]="[2]"
+      [zoom]="2"
       [center]="[0, 0]"
       [canvasContextAttributes]="{preserveDrawingBuffer: true}"
     >

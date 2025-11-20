@@ -22,7 +22,7 @@ import { interval, map, shareReplay, startWith, switchMap } from 'rxjs';
         'https://api.maptiler.com/maps/streets/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL'
       "
       [center]="center()"
-      [zoom]="[14]"
+      [zoom]="14"
       movingMethod="jumpTo"
       [canvasContextAttributes]="{preserveDrawingBuffer: true}"
     >

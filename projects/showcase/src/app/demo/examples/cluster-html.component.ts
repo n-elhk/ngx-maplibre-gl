@@ -171,7 +171,7 @@ const MAG5 = ['>=', ['get', 'mag'], 5];
       [style]="
         'https://api.maptiler.com/maps/streets/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL'
       "
-      [zoom]="[0.3]"
+      [zoom]="0.3"
       [center]="[0, 20]"
       [canvasContextAttributes]="{preserveDrawingBuffer: true}"
     >

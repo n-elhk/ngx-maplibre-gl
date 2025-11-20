@@ -15,7 +15,7 @@ import { HttpClient } from '@angular/common/http';
       [style]="
         'https://api.maptiler.com/maps/streets/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL'
       "
-      [zoom]="[14]"
+      [zoom]="14"
       [center]="center() ?? [0, 0]"
       [centerWithPanTo]="true"
       [pitch]="30"

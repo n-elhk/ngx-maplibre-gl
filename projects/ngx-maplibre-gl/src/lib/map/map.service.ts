@@ -4,7 +4,7 @@ import {
   OutputEmitterRef,
   inject,
   signal,
-} from '@angular/core';
+} from "@angular/core";
 import {
   type CameraOptions,
   type FlyToOptions,
@@ -38,32 +38,32 @@ import {
   type ControlPosition,
   type Subscription,
   type MapLayerEventType,
-  type ProjectionSpecification
-} from 'maplibre-gl';
-import { AsyncSubject } from 'rxjs';
+  type ProjectionSpecification,
+} from "maplibre-gl";
+import { AsyncSubject } from "rxjs";
 import type {
   LayerEvents,
   MapEvent,
   MapImageData,
   MapImageOptions,
-} from './map.types';
-import { keepAvailableObjectValues } from '../shared/utils/functions/object.fn';
+} from "./map.types";
+import { keepAvailableObjectValues } from "../shared/utils/functions/object.fn";
+
+export type MapSpecification = {
+  terrain?: TerrainSpecification;
+  projection?: ProjectionSpecification;
+};
 
 export type SetupMap = {
-  mapOptions: Omit<MapOptions, 'bearing' | 'pitch' | 'zoom'> & {
-    bearing?: [number];
-    pitch?: [number];
-    zoom?: [number];
-    terrain?: TerrainSpecification;
-    projection?: ProjectionSpecification;
-  };
+  mapOptions: MapOptions;
+  mapSpecifications: MapSpecification;
   mapEvents: MapEvent;
-}
+};
 
 export type SetupLayer = {
   layerOptions: LayerSpecification;
   layerEvents: LayerEvents;
-}
+};
 
 export type SetupPopup = {
   popupOptions: PopupOptions;
@@ -71,13 +71,13 @@ export type SetupPopup = {
     popupOpen: OutputEmitterRef<void>;
     popupClose: OutputEmitterRef<void>;
   };
-}
+};
 
 export type SetupMarkerOptions = {
   element: HTMLElement;
   feature?: GeoJSON.Feature<GeoJSON.Point>;
   lngLat?: LngLatLike;
-} & MarkerOptions
+} & MarkerOptions;
 
 export type SetupMarker = {
   markersOptions: SetupMarkerOptions;
@@ -86,7 +86,7 @@ export type SetupMarker = {
     markerDrag: OutputEmitterRef<Marker>;
     markerDragEnd: OutputEmitterRef<Marker>;
   };
-}
+};
 
 export type MovingOptions =
   | FlyToOptions
@@ -102,7 +102,10 @@ export class MapService {
 
   mapInstance: MaplibreMap;
   mapEvents: MapEvent;
-  private readonly subscriptionsPerInstance = new Map<Evented, Subscription[]>();
+  private readonly subscriptionsPerInstance = new Map<
+    Evented,
+    Subscription[]
+  >();
 
   private readonly mapCreated = new AsyncSubject<void>();
   private readonly mapLoaded = new AsyncSubject<void>();
@@ -115,19 +118,22 @@ export class MapService {
 
   setup(options: SetupMap) {
     // Workaround rollup issue
-    this.createMap(options.mapOptions as MapOptions);
+    this.createMap(options.mapOptions);
     this.hookEvents(options.mapEvents);
     this.mapEvents = options.mapEvents;
     this.mapCreated.next(undefined);
     this.mapCreated.complete();
 
-    if (options.mapOptions.terrain || options.mapOptions.projection) {
-      this.mapInstance.on('load', () => {
-        if (options.mapOptions.projection) {
-          this.setProjection(options.mapOptions.projection!);
+    if (
+      options.mapSpecifications.terrain ||
+      options.mapSpecifications.projection
+    ) {
+      this.mapInstance.on("load", () => {
+        if (options.mapSpecifications.projection) {
+          this.setProjection(options.mapSpecifications.projection);
         }
-        if (options.mapOptions.terrain) {
-          this.setTerrain(options.mapOptions.terrain!);
+        if (options.mapSpecifications.terrain) {
+          this.setTerrain(options.mapSpecifications.terrain);
         }
       });
     }
@@ -291,7 +297,7 @@ export class MapService {
   }
 
   move(
-    movingMethod: 'jumpTo' | 'easeTo' | 'flyTo',
+    movingMethod: "jumpTo" | "easeTo" | "flyTo",
     movingOptions?: MovingOptions,
     zoom?: number,
     center?: LngLatLike,
@@ -327,19 +333,97 @@ export class MapService {
         return;
       }
       const subscriptions: Subscription[] = [];
-      subscriptions.push(this.createSubscriptionForLayer(layer.layerOptions.id, 'click', layer.layerEvents.layerClick));
-      subscriptions.push(this.createSubscriptionForLayer(layer.layerOptions.id, 'dblclick', layer.layerEvents.layerDblClick));
-      subscriptions.push(this.createSubscriptionForLayer(layer.layerOptions.id, 'mousedown', layer.layerEvents.layerMouseDown));
-      subscriptions.push(this.createSubscriptionForLayer(layer.layerOptions.id, 'mouseup', layer.layerEvents.layerMouseUp));
-      subscriptions.push(this.createSubscriptionForLayer(layer.layerOptions.id, 'mouseenter', layer.layerEvents.layerMouseEnter));
-      subscriptions.push(this.createSubscriptionForLayer(layer.layerOptions.id, 'mouseleave', layer.layerEvents.layerMouseLeave));
-      subscriptions.push(this.createSubscriptionForLayer(layer.layerOptions.id, 'mousemove', layer.layerEvents.layerMouseMove));
-      subscriptions.push(this.createSubscriptionForLayer(layer.layerOptions.id, 'mouseover', layer.layerEvents.layerMouseOver));
-      subscriptions.push(this.createSubscriptionForLayer(layer.layerOptions.id, 'mouseout', layer.layerEvents.layerMouseOut));
-      subscriptions.push(this.createSubscriptionForLayer(layer.layerOptions.id, 'contextmenu', layer.layerEvents.layerContextMenu));
-      subscriptions.push(this.createSubscriptionForLayer(layer.layerOptions.id, 'touchstart', layer.layerEvents.layerTouchStart));
-      subscriptions.push(this.createSubscriptionForLayer(layer.layerOptions.id, 'touchend', layer.layerEvents.layerTouchEnd));
-      subscriptions.push(this.createSubscriptionForLayer(layer.layerOptions.id, 'touchcancel', layer.layerEvents.layerTouchCancel));
+      subscriptions.push(
+        this.createSubscriptionForLayer(
+          layer.layerOptions.id,
+          "click",
+          layer.layerEvents.layerClick
+        )
+      );
+      subscriptions.push(
+        this.createSubscriptionForLayer(
+          layer.layerOptions.id,
+          "dblclick",
+          layer.layerEvents.layerDblClick
+        )
+      );
+      subscriptions.push(
+        this.createSubscriptionForLayer(
+          layer.layerOptions.id,
+          "mousedown",
+          layer.layerEvents.layerMouseDown
+        )
+      );
+      subscriptions.push(
+        this.createSubscriptionForLayer(
+          layer.layerOptions.id,
+          "mouseup",
+          layer.layerEvents.layerMouseUp
+        )
+      );
+      subscriptions.push(
+        this.createSubscriptionForLayer(
+          layer.layerOptions.id,
+          "mouseenter",
+          layer.layerEvents.layerMouseEnter
+        )
+      );
+      subscriptions.push(
+        this.createSubscriptionForLayer(
+          layer.layerOptions.id,
+          "mouseleave",
+          layer.layerEvents.layerMouseLeave
+        )
+      );
+      subscriptions.push(
+        this.createSubscriptionForLayer(
+          layer.layerOptions.id,
+          "mousemove",
+          layer.layerEvents.layerMouseMove
+        )
+      );
+      subscriptions.push(
+        this.createSubscriptionForLayer(
+          layer.layerOptions.id,
+          "mouseover",
+          layer.layerEvents.layerMouseOver
+        )
+      );
+      subscriptions.push(
+        this.createSubscriptionForLayer(
+          layer.layerOptions.id,
+          "mouseout",
+          layer.layerEvents.layerMouseOut
+        )
+      );
+      subscriptions.push(
+        this.createSubscriptionForLayer(
+          layer.layerOptions.id,
+          "contextmenu",
+          layer.layerEvents.layerContextMenu
+        )
+      );
+      subscriptions.push(
+        this.createSubscriptionForLayer(
+          layer.layerOptions.id,
+          "touchstart",
+          layer.layerEvents.layerTouchStart
+        )
+      );
+      subscriptions.push(
+        this.createSubscriptionForLayer(
+          layer.layerOptions.id,
+          "touchend",
+          layer.layerEvents.layerTouchEnd
+        )
+      );
+      subscriptions.push(
+        this.createSubscriptionForLayer(
+          layer.layerOptions.id,
+          "touchcancel",
+          layer.layerEvents.layerTouchCancel
+        )
+      );
       const layerInstance = this.mapInstance.getLayer(layer.layerOptions.id);
       if (layerInstance) {
         this.subscriptionsPerInstance.set(layerInstance, subscriptions);
@@ -351,7 +435,8 @@ export class MapService {
     this.zone.runOutsideAngular(() => {
       const layerInstance = this.mapInstance.getLayer(layerId);
       if (layerInstance != null) {
-        const subscriptions = this.subscriptionsPerInstance.get(layerInstance) || [];
+        const subscriptions =
+          this.subscriptionsPerInstance.get(layerInstance) || [];
         for (const subscription of subscriptions) {
           subscription.unsubscribe();
         }
@@ -382,7 +467,7 @@ export class MapService {
     };
 
     const markerInstance = new Marker(options);
-    markerInstance.on('dragstart', (event: { target: Marker }) => {
+    markerInstance.on("dragstart", (event: { target: Marker }) => {
       if (event) {
         const { target } = event;
         this.zone.run(() => {
@@ -391,13 +476,13 @@ export class MapService {
       }
     });
 
-    markerInstance.on('drag', (event: { target: Marker }) => {
+    markerInstance.on("drag", (event: { target: Marker }) => {
       if (event) {
         const { target } = event;
         this.zone.run(() => marker.markersEvents.markerDrag.emit(target));
       }
     });
-    markerInstance.on('dragend', (event: { target: Marker }) => {
+    markerInstance.on("dragend", (event: { target: Marker }) => {
       if (event) {
         const { target } = event;
         this.zone.run(() => marker.markersEvents.markerDragEnd.emit(target));
@@ -423,8 +508,20 @@ export class MapService {
       const popupInstance = new Popup(popupOptions);
       popupInstance.setDOMContent(element);
       const subscriptions: Subscription[] = [];
-      subscriptions.push(this.createSubscriptionForPopup(popupInstance, 'open', popup.popupEvents.popupOpen));
-      subscriptions.push(this.createSubscriptionForPopup(popupInstance, 'close', popup.popupEvents.popupClose));
+      subscriptions.push(
+        this.createSubscriptionForPopup(
+          popupInstance,
+          "open",
+          popup.popupEvents.popupOpen
+        )
+      );
+      subscriptions.push(
+        this.createSubscriptionForPopup(
+          popupInstance,
+          "close",
+          popup.popupEvents.popupClose
+        )
+      );
       this.subscriptionsPerInstance.set(popupInstance, subscriptions);
       return popupInstance;
     });
@@ -527,13 +624,13 @@ export class MapService {
   setAllLayerPaintProperty(
     layerId: string,
     paint:
-      | BackgroundLayerSpecification['paint']
-      | FillLayerSpecification['paint']
-      | FillExtrusionLayerSpecification['paint']
-      | LineLayerSpecification['paint']
-      | SymbolLayerSpecification['paint']
-      | RasterLayerSpecification['paint']
-      | CircleLayerSpecification['paint']
+      | BackgroundLayerSpecification["paint"]
+      | FillLayerSpecification["paint"]
+      | FillExtrusionLayerSpecification["paint"]
+      | LineLayerSpecification["paint"]
+      | SymbolLayerSpecification["paint"]
+      | RasterLayerSpecification["paint"]
+      | CircleLayerSpecification["paint"]
   ) {
     return this.zone.runOutsideAngular(() => {
       Object.keys(paint as any).forEach((key) => {
@@ -546,13 +643,13 @@ export class MapService {
   setAllLayerLayoutProperty(
     layerId: string,
     layout:
-      | BackgroundLayerSpecification['layout']
-      | FillLayerSpecification['layout']
-      | FillExtrusionLayerSpecification['layout']
-      | LineLayerSpecification['layout']
-      | SymbolLayerSpecification['layout']
-      | RasterLayerSpecification['layout']
-      | CircleLayerSpecification['layout']
+      | BackgroundLayerSpecification["layout"]
+      | FillLayerSpecification["layout"]
+      | FillExtrusionLayerSpecification["layout"]
+      | LineLayerSpecification["layout"]
+      | SymbolLayerSpecification["layout"]
+      | RasterLayerSpecification["layout"]
+      | CircleLayerSpecification["layout"]
   ) {
     return this.zone.runOutsideAngular(() => {
       Object.keys(layout as any).forEach((key) => {
@@ -658,218 +755,226 @@ export class MapService {
     }
 
     return layers.filter((l) =>
-      'source' in l ? l.source === sourceId : false
+      "source" in l ? l.source === sourceId : false
     );
   }
 
   private hookEvents(events: MapEvent) {
-    this.mapInstance.on('load', (evt) => {
+    this.mapInstance.on("load", (evt) => {
       this.mapLoaded.next(undefined);
       this.mapLoaded.complete();
       this.zone.run(() => {
         events.mapLoad.emit(evt.target);
       });
     });
-    this.mapInstance.on('resize', (evt) =>
+    this.mapInstance.on("resize", (evt) =>
       this.zone.run(() => {
         events.mapResize.emit(evt);
       })
     );
-    this.mapInstance.on('remove', (evt) =>
+    this.mapInstance.on("remove", (evt) =>
       this.zone.run(() => {
         events.mapRemove.emit(evt);
       })
     );
-    this.mapInstance.on('mousedown', (evt) =>
+    this.mapInstance.on("mousedown", (evt) =>
       this.zone.run(() => {
         events.mapMouseDown.emit(evt);
       })
     );
-    this.mapInstance.on('mouseup', (evt) =>
+    this.mapInstance.on("mouseup", (evt) =>
       this.zone.run(() => {
         events.mapMouseUp.emit(evt);
       })
     );
-    this.mapInstance.on('mousemove', (evt) =>
+    this.mapInstance.on("mousemove", (evt) =>
       this.zone.run(() => {
         events.mapMouseMove.emit(evt);
       })
     );
-    this.mapInstance.on('click', (evt) =>
+    this.mapInstance.on("click", (evt) =>
       this.zone.run(() => {
         events.mapClick.emit(evt);
       })
     );
-    this.mapInstance.on('dblclick', (evt) =>
+    this.mapInstance.on("dblclick", (evt) =>
       this.zone.run(() => {
         events.mapDblClick.emit(evt);
       })
     );
-    this.mapInstance.on('mouseover', (evt) =>
+    this.mapInstance.on("mouseover", (evt) =>
       this.zone.run(() => {
         events.mapMouseOver.emit(evt);
       })
     );
-    this.mapInstance.on('mouseout', (evt) =>
+    this.mapInstance.on("mouseout", (evt) =>
       this.zone.run(() => {
         events.mapMouseOut.emit(evt);
       })
     );
-    this.mapInstance.on('contextmenu', (evt) =>
+    this.mapInstance.on("contextmenu", (evt) =>
       this.zone.run(() => {
         events.mapContextMenu.emit(evt);
       })
     );
-    this.mapInstance.on('touchstart', (evt) =>
+    this.mapInstance.on("touchstart", (evt) =>
       this.zone.run(() => {
         events.mapTouchStart.emit(evt);
       })
     );
-    this.mapInstance.on('touchend', (evt) =>
+    this.mapInstance.on("touchend", (evt) =>
       this.zone.run(() => {
         events.mapTouchEnd.emit(evt);
       })
     );
-    this.mapInstance.on('touchmove', (evt) =>
+    this.mapInstance.on("touchmove", (evt) =>
       this.zone.run(() => {
         events.mapTouchMove.emit(evt);
       })
     );
-    this.mapInstance.on('touchcancel', (evt) =>
+    this.mapInstance.on("touchcancel", (evt) =>
       this.zone.run(() => {
         events.mapTouchCancel.emit(evt);
       })
     );
-    this.mapInstance.on('wheel', (evt) =>
+    this.mapInstance.on("wheel", (evt) =>
       this.zone.run(() => {
         events.mapWheel.emit(evt);
       })
     );
-    this.mapInstance.on('movestart', (evt) =>
+    this.mapInstance.on("movestart", (evt) =>
       this.zone.run(() => events.moveStart.emit(evt))
     );
-    this.mapInstance.on('move', (evt) =>
+    this.mapInstance.on("move", (evt) =>
       this.zone.run(() => events.move.emit(evt))
     );
-    this.mapInstance.on('moveend', (evt) =>
+    this.mapInstance.on("moveend", (evt) =>
       this.zone.run(() => events.moveEnd.emit(evt))
     );
-    this.mapInstance.on('dragstart', (evt) =>
+    this.mapInstance.on("dragstart", (evt) =>
       this.zone.run(() => {
         events.mapDragStart.emit(evt);
       })
     );
-    this.mapInstance.on('drag', (evt) =>
+    this.mapInstance.on("drag", (evt) =>
       this.zone.run(() => {
         events.mapDrag.emit(evt);
       })
     );
-    this.mapInstance.on('dragend', (evt) =>
+    this.mapInstance.on("dragend", (evt) =>
       this.zone.run(() => {
         events.mapDragEnd.emit(evt);
       })
     );
-    this.mapInstance.on('zoomstart', (evt) =>
+    this.mapInstance.on("zoomstart", (evt) =>
       this.zone.run(() => events.zoomStart.emit(evt))
     );
-    this.mapInstance.on('zoom', (evt) =>
+    this.mapInstance.on("zoom", (evt) =>
       this.zone.run(() => events.zoomEvt.emit(evt))
     );
-    this.mapInstance.on('zoomend', (evt) =>
+    this.mapInstance.on("zoomend", (evt) =>
       this.zone.run(() => events.zoomEnd.emit(evt))
     );
-    this.mapInstance.on('rotatestart', (evt) =>
+    this.mapInstance.on("rotatestart", (evt) =>
       this.zone.run(() => events.rotateStart.emit(evt))
     );
-    this.mapInstance.on('rotate', (evt) =>
+    this.mapInstance.on("rotate", (evt) =>
       this.zone.run(() => events.rotate.emit(evt))
     );
-    this.mapInstance.on('rotateend', (evt) =>
+    this.mapInstance.on("rotateend", (evt) =>
       this.zone.run(() => events.rotateEnd.emit(evt))
     );
-    this.mapInstance.on('pitchstart', (evt) =>
+    this.mapInstance.on("pitchstart", (evt) =>
       this.zone.run(() => events.pitchStart.emit(evt))
     );
-    this.mapInstance.on('pitch', (evt) =>
+    this.mapInstance.on("pitch", (evt) =>
       this.zone.run(() => events.pitchEvt.emit(evt))
     );
-    this.mapInstance.on('pitchend', (evt) =>
+    this.mapInstance.on("pitchend", (evt) =>
       this.zone.run(() => events.pitchEnd.emit(evt))
     );
-    this.mapInstance.on('boxzoomstart', (evt) =>
+    this.mapInstance.on("boxzoomstart", (evt) =>
       this.zone.run(() => events.boxZoomStart.emit(evt))
     );
-    this.mapInstance.on('boxzoomend', (evt) =>
+    this.mapInstance.on("boxzoomend", (evt) =>
       this.zone.run(() => events.boxZoomEnd.emit(evt))
     );
-    this.mapInstance.on('boxzoomcancel', (evt) =>
+    this.mapInstance.on("boxzoomcancel", (evt) =>
       this.zone.run(() => events.boxZoomCancel.emit(evt))
     );
-    this.mapInstance.on('webglcontextlost', (evt) =>
+    this.mapInstance.on("webglcontextlost", (evt) =>
       this.zone.run(() => events.webGlContextLost.emit(evt))
     );
-    this.mapInstance.on('webglcontextrestored', (evt) =>
+    this.mapInstance.on("webglcontextrestored", (evt) =>
       this.zone.run(() => events.webGlContextRestored.emit(evt))
     );
-    this.mapInstance.on('render', (evt) =>
+    this.mapInstance.on("render", (evt) =>
       this.zone.run(() => events.render.emit(evt))
     );
-    this.mapInstance.on('error', (evt) =>
+    this.mapInstance.on("error", (evt) =>
       this.zone.run(() => {
         events.mapError.emit(evt);
       })
     );
-    this.mapInstance.on('data', (evt) =>
+    this.mapInstance.on("data", (evt) =>
       this.zone.run(() => events.data.emit(evt))
     );
-    this.mapInstance.on('styledata', (evt) =>
+    this.mapInstance.on("styledata", (evt) =>
       this.zone.run(() => events.styleData.emit(evt))
     );
-    this.mapInstance.on('sourcedata', (evt) =>
+    this.mapInstance.on("sourcedata", (evt) =>
       this.zone.run(() => events.sourceData.emit(evt))
     );
-    this.mapInstance.on('dataloading', (evt) =>
+    this.mapInstance.on("dataloading", (evt) =>
       this.zone.run(() => events.dataLoading.emit(evt))
     );
-    this.mapInstance.on('styledataloading', (evt) =>
+    this.mapInstance.on("styledataloading", (evt) =>
       this.zone.run(() => events.styleDataLoading.emit(evt))
     );
-    this.mapInstance.on('sourcedataloading', (evt) =>
+    this.mapInstance.on("sourcedataloading", (evt) =>
       this.zone.run(() => events.sourceDataLoading.emit(evt))
     );
-    this.mapInstance.on('styleimagemissing', (evt) =>
+    this.mapInstance.on("styleimagemissing", (evt) =>
       this.zone.run(() => events.styleImageMissing.emit(evt))
     );
-    this.mapInstance.on('idle', (evt) =>
+    this.mapInstance.on("idle", (evt) =>
       this.zone.run(() => events.idle.emit(evt))
     );
   }
 
-  private createSubscriptionForLayer(layerId: string, event: keyof MapLayerEventType, emitter: OutputEmitterRef<any>): Subscription {
+  private createSubscriptionForLayer(
+    layerId: string,
+    event: keyof MapLayerEventType,
+    emitter: OutputEmitterRef<any>
+  ): Subscription {
     const handler = (evt: any) => {
       this.zone.run(() => {
         emitter.emit(evt);
       });
-    }
+    };
     this.mapInstance.on(event, layerId, handler);
     return {
       unsubscribe: () => {
         this.mapInstance.off(event, layerId, handler);
       },
-    }
+    };
   }
 
-  private createSubscriptionForPopup(popup: Popup, event: "open" | "close", emitter: OutputEmitterRef<any>): Subscription {
+  private createSubscriptionForPopup(
+    popup: Popup,
+    event: "open" | "close",
+    emitter: OutputEmitterRef<any>
+  ): Subscription {
     const handler = (evt: any) => {
       this.zone.run(() => {
         emitter.emit(evt);
       });
-    }
+    };
     popup.on(event, handler);
     return {
       unsubscribe: () => {
         popup.off(event, handler);
       },
-    }
+    };
   }
 }

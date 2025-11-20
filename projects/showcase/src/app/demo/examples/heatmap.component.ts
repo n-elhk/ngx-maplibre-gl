@@ -14,7 +14,7 @@ import { httpResource } from '@angular/common/http';
       [style]="
         'https://api.maptiler.com/maps/streets/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL'
       "
-      [zoom]="[3]"
+      [zoom]="3"
       [center]="[-103.59179687498357, 40.66995747013945]"
       [canvasContextAttributes]="{preserveDrawingBuffer: true}"
     >

@@ -8,7 +8,7 @@ import { MapComponent, MarkerComponent } from '@maplibre/ngx-maplibre-gl';
       [style]="
         'https://api.maptiler.com/maps/streets/style.json?key=get_your_own_OpIi9ZULNHzrESv6T2vL'
       "
-      [zoom]="[5]"
+      [zoom]="5"
       [center]="[-65.017, -16.457]"
       [canvasContextAttributes]="{preserveDrawingBuffer: true}"
     >

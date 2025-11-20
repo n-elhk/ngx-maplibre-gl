@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
-import { AnimationOptions } from 'maplibre-gl';
-import { MatIconModule } from '@angular/material/icon';
-import { MapComponent } from '@maplibre/ngx-maplibre-gl';
+import { ChangeDetectionStrategy, Component, signal } from "@angular/core";
+import { AnimationOptions } from "maplibre-gl";
+import { MatIconModule } from "@angular/material/icon";
+import { MapComponent } from "@maplibre/ngx-maplibre-gl";
 
 @Component({
   template: `
     <mgl-map
       [style]="'https://demotiles.maplibre.org/style.json'"
-      [zoom]="[2]"
+      [zoom]="2"
       [center]="center()"
       [centerWithPanTo]="true"
       [panToOptions]="panToOptions"
@@ -16,7 +16,7 @@ import { MapComponent } from '@maplibre/ngx-maplibre-gl';
       (moveEnd)="moveCenter()"
     />
   `,
-  styleUrls: ['./home-index.component.scss'],
+  styleUrls: ["./home-index.component.scss"],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [MapComponent, MatIconModule],
 })
@@ -28,7 +28,7 @@ export class HomeIndexComponent {
   };
 
   moveCenter() {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
     const targetY = this.center()[0];
